@@ -27,8 +27,9 @@ int main(int argc, char* argv[]) {
     Circle ball(WIDTH / 2, HEIGHT / 2, 50);
     SDL_Rect background({0, 0, WIDTH, HEIGHT});
 
-    ball.nudge(5, circle::Direction::LEFT);
+    ball.nudge(50, circle::Direction::RIGHT);
 
+    double nudge_amt = 10.0;
     while (application_running) {
         Uint32 frame_start = SDL_GetTicks();
 
@@ -42,8 +43,25 @@ int main(int argc, char* argv[]) {
                         application_running = false;
                     }
                     break;
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym) {
+                        case SDLK_UP:
+                            ball.nudge(nudge_amt, circle::Direction::UP);
+                            break;
+                        case SDLK_DOWN:
+                            ball.nudge(nudge_amt, circle::Direction::DOWN);
+                            break;
+                        case SDLK_LEFT:
+                            ball.nudge(nudge_amt, circle::Direction::LEFT);
+                            break;
+                        case SDLK_RIGHT:
+                            ball.nudge(nudge_amt, circle::Direction::RIGHT);
+                            break;
+                    }
             }
         }
+
+        ball.step(window);
 
         SDL_FillRect(surface, &background, 0x00000000);
         ball.render(window, surface);

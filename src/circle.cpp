@@ -3,14 +3,18 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_video.h>
+#include <cmath>
 #include "circle.h"
+#include <iostream>
 
 using namespace circle;
+using std::abs;
 
 Circle::Circle(int x, int y, int radius, Uint32 color):
     x_(x), y_(y), radius_(radius), dx(0), dy(0), color(color) {}
 
-void Circle::render(SDL_Window* window, SDL_Surface* surface) {
+
+void Circle::step(SDL_Window* window) {
     x_ += dx;
     y_ += dy;
     dy += GRAVITY;
@@ -20,21 +24,32 @@ void Circle::render(SDL_Window* window, SDL_Surface* surface) {
 
     if (x_ - radius_ < 0) {
         x_ = radius_;
-        dx = -dx;
+        dx = -dx * LOSS_COEFF;
+        if (abs(dx) < EPSILON) {
+            dx = 0;
+        }
     }
     if (x_ + radius_ > w) {
         x_ = w - radius_;
-        dx = -dx;
+        dx = -dx * LOSS_COEFF;
+        if (abs(dx) < EPSILON) {
+            dx = 0;
+        }
     }
     if (y_ - radius_ < 0) {
         y_ = radius_;
-        dy = -dy;
+        dy = -dy * LOSS_COEFF;
     }
-    if(y_ + radius_ > h) {
+    if(y_ + radius_ > h - 1) {
         y_ = h - radius_;
-        dy = -dy;
+        dy = -dy * LOSS_COEFF;
+        if (abs(dy) < EPSILON) {
+            dy = 0;
+        }
     }
+}
 
+void Circle::render(SDL_Window* window, SDL_Surface* surface) {
     int low_x = x_ - radius_;
     int low_y = y_ - radius_;
     int high_x = x_ + radius_;
@@ -53,7 +68,7 @@ void Circle::render(SDL_Window* window, SDL_Surface* surface) {
     }
 }
 
-void Circle::nudge(uint nudge_amount, circle::Direction dir) {
+void Circle::nudge(double nudge_amount, circle::Direction dir) {
     switch (dir) {
         case DOWN:
             dy += nudge_amount;
